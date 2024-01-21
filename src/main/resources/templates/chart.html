@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-time Chart Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        canvas {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+    </style>
+</head>
+<body>
+<a href="/home" >Home</a>
+<div style="width: 800px;">
+    <canvas id="real-time-chart"></canvas>
+</div>
+<div>
+    Prediction: <span id="prediction"></span>
+</div>
+
+<button id="restart">Restart recipient</button>
+<script>
+    document.getElementById('restart').addEventListener('click', function() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', currentPageUrl + '/options?action=restart', true);
+        xhr.send();
+    });
+</script>
+
+<button id="reset-filter">Reset filter</button>
+<script>
+    document.getElementById('reset-filter').addEventListener('click', function() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', currentPageUrl + '/options?action=reset_filter', true);
+        xhr.send();
+    });
+</script>
+
+
+<script>
+    var ctx = document.getElementById('real-time-chart').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Real-time Data',
+                backgroundColor: 'rgba(75,192,192,0.4)',
+                borderColor: 'rgba(75,192,192,1)',
+                data: [],
+                pointRadius: 0
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Time'
+                    }
+                },
+                y: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Value'
+                    }
+                }
+            },
+            responsive: true,
+            animation: false
+        }
+    });
+    var currentPageUrl = window.location.href;
+    var currentChip;
+    if (currentPageUrl.indexOf('?') === -1) {
+        currentChip = currentPageUrl.substring(currentPageUrl.lastIndexOf('/') + 1);
+    }
+    else {
+        currentChip = currentPageUrl.substring(currentPageUrl.lastIndexOf('/') + 1, currentPageUrl.indexOf('?'));
+    }
+
+    // AJAX-запрос на сервер для получения данных в реальном времени
+    function fetchData() {
+        fetch(currentPageUrl.substring(0, currentPageUrl.indexOf("/chart")) + "/api/chart/" + currentChip)
+            .then(response => response.json())
+            .then(data => {
+                chart.data.labels = data.labels;
+                chart.data.datasets[0].data = data.values;
+                chart.update();
+            })
+            .catch(error => console.error('Ошибка:', error));
+
+        setTimeout(fetchData, 40);
+        // setTimeout(fetchData, 40000);
+    }
+
+    function fetchPrediction(){
+        fetch(currentPageUrl.substring(0, currentPageUrl.indexOf("/chart")) + "/api/predict/" + currentChip)
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('prediction').textContent = data;
+            })
+            .catch(error => {
+                console.error("Произошла ошибка при чтении значения с сервера:", error);
+            });
+
+        setTimeout(fetchPrediction, 200);
+        // setTimeout(fetchPrediction, 20000);
+    }
+
+    fetchData();
+    fetchPrediction()
+</script>
+</body>
+</html>
