@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-time Chart Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+    <script src="stomp.js"></script>
+    <style>
+        canvas {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <a href="/home">Home</a>
+    <div>
+        <div>
+            <canvas id="gestureChart"></canvas>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
+<script>
+    let ctx = document.getElementById('gestureChart').getContext('2d');
+
+    var myDatasets = [];
+
+    myDatasets.push({
+        label: 'signal 0',
+        borderColor: 'rgb(0, 0, 255)',
+        backgroundColor: 'rgba(0,0,255, 0.4)',
+        data: [],
+        pointRadius: 0
+    });
+
+    // for (var i = 0; i < 20; i++) {
+    //     myDatasets.push({
+    //         label: 'Memory',
+    //         fill: false,
+    //         borderColor: 'rgb(75, 192, 192)',
+    //         backgroundColor: 'rgba(75,192,192,0.4)',
+    //         borderColor: 'rgba(75,192,192,0.4)',
+    //         tension: 0.1,
+    //         pointRadius: 0
+    //     });
+    // }
+
+    let chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: myDatasets
+        },
+        options: {
+            plugins: {
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                },
+                title: {
+                    display: true,
+                    text: 'Gesture chart'
+                }
+            },
+            scales: {
+                x: {
+                    color: 'black',
+                    display: true,
+                    ticks: {
+                        color: 'black', // изменить цвет надписей на оси y
+                        // stepSize: 50,
+                        // max: 20,
+                        maxTicksLimit: 20,
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.3)' // изменить цвет линий фона на оси x
+                    }
+                },
+                y: {
+                    color: 'black',
+                    // suggestedMin: -0.3,
+                    // suggestedMax: 0.4,
+                    display: true,
+                    ticks: {
+                        color: 'black', // изменить цвет надписей на оси y
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.3)' // изменить цвет линий фона на оси x
+                    }
+                }
+            },
+            responsive: true,
+            animation: false
+        }
+    });
+
+    const currentPageUrl = new URL(window.location.href);
+    const name = currentPageUrl.searchParams.get("name");
+    let numberArray;
+
+
+    fetch('/api/config?name=' + name)
+        .then(response => response.json())
+        .then(data => {
+            const number = data.gestureSize;
+            numberArray = Array.from({length: number}, (_, index) => index + 1);
+            chart.data.labels = numberArray;
+        })
+        .catch(error => {
+            console.error('Произошла ошибка при обработке запроса:', error);
+        });
+
+    let a = 0;
+    var socket = new SockJS("portfolio");
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function (frame) {
+        // console.log('Connected: ' + frame);
+        stompClient.subscribe('/topic/portfolio?name=' + name, function (response) {
+            var floatList = JSON.parse(response.body);
+            // console.log('Received float list: ' + floatList);
+
+            chart.data.labels = floatList.labels;
+            chart.data.datasets[a].data = floatList.values;
+            // chart.data.datasets[a].data = 1;
+            // chart.data.datasets[a].labels = a;
+            a++;
+
+            let rgb;
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+
+            rgb = 'rgb(' + r + ', ' + g + ', ' + b + ')';
+            console.log(rgb);
+            chart.data.datasets.push({
+                label: 'signal ' + a,
+                fill: false,
+                backgroundColor: rgb,
+                borderColor: rgb,
+                // tension: 0.1,
+                pointRadius: 0
+            })
+            chart.update();
+        });
+    })  ;
+
+    // const eventSource = new EventSource("/api/chart/spectrum?name=" + name);
+
+    // eventSource.onmessage = function(event) {
+    //     // console.log('Received update: ' + event.data);
+    //     // console.log('Received update: ' + JSON.parse(event.data).labels);
+    //     chart.data.labels = JSON.parse(event.data).labels;
+    //     chart.data.datasets[a].data = JSON.parse(event.data).values;
+    //     // chart.data.datasets[a].data = 1;
+    //     // chart.data.datasets[a].labels = a;
+    //     a++;
+    //
+    //     let rgb;
+    //     const r = Math.floor(Math.random() * 256);
+    //     const g = Math.floor(Math.random() * 256);
+    //     const b = Math.floor(Math.random() * 256);
+    //
+    //     rgb = 'rgb(' + r + ', ' + g + ', ' + b + ')';
+    //     console.log(rgb);
+    //     chart.data.datasets.push({
+    //         label: 'signal ' + a,
+    //         fill: false,
+    //         backgroundColor: rgb,
+    //         borderColor: rgb,
+    //         // tension: 0.1,
+    //         pointRadius: 0
+    //     })
+    //     chart.update();
+    // };
+
+    // eventSource.onerror = function (error) {
+    //     console.error('EventSource failed:', error);
+    // };
+
+</script>

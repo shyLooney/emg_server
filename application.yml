@@ -1,0 +1,26 @@
+server:
+  host: localhost
+  port: 8080
+  address: 0.0.0.0
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 3MB
+      max-request-size: 3MB
+      enabled: true
+#  rsocket:
+#    server:
+#      port: 0
+#      mapping-path: "/rsocket"
+#      transport: "websocket"
+
+recipient:
+  graphLen: 10000
+  sigScale: 0.0001
+  gestureSize: 2000
+  packetSize: 528
+  threshold: 0.01
+  waitingConnectionTimeout: 10000
+  waitingReadTimeout: 5000
+

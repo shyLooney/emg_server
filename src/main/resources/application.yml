@@ -1,1 +1,5 @@
-
+spring:
+  config:
+    location: classpath:/,file:./application.yml
+storage:
+  location: a

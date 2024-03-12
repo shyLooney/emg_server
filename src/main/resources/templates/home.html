@@ -10,7 +10,7 @@
 <a href="/registration">Registration</a>
 <ul>
     <li th:each="chip : ${chipMap.values()}">
-        <a th:href="@{/chart/{value}(value=${chip.name})}" th:text="${chip.name}">lol</a>
+        <a th:href="@{/chart?name={value}(value=${chip.name})}" th:text="${chip.name}">lol</a>
     </li>
 </ul>
 </body>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-time Chart Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        canvas {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .container {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: 83% 15%;
+            margin: 0 0 0 0px;
+        }
+
+        .menu {
+            margin: 0 0 0 10%;
+        }
+
+        .vbox {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: 5% 5%;
+        }
+
+        .row {
+            display: flex;
+            width: 100%;
+        }
+
+        .row input {
+            flex: 1;
+            padding: 5px;
+            margin: 0 5px 0 0;
+        }
+
+        .bottom {
+            width: 100%;
+        }
+
+        .row button {
+            width: 97%;
+            height: 40px;
+            margin: 5px 5px 5px 0;
+        }
+
+        .progress-bar {
+            width: 97%;
+            height: 30px;
+            background-color: lightgray;
+            border: 1px solid gray;
+            margin-bottom: 7px;
+            position: relative;
+            display: flex;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: blue;
+            transition: width 0.3s;
+        }
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <a href="/home">Home</a>
+    <div class="container">
+        <div class="chart">
+            <canvas id="gestureChart"></canvas>
+        </div>
+        <div class="menu">
+            <div class="row">
+                <h3>Scale</h3>
+            </div>
+            <div class="row">
+                <input type="number" id="minScale" class="row input">
+                <input type="number" id="maxScale" class="row input">
+            </div>
+            <div class="row">
+                <h3>Request rate (ms.)</h3>
+            </div>
+            <div class="row">
+                <input type="number" id="refreshTime" class="bottom">
+            </div>
+
+            <div class="row">
+                <h3>Gesture save</h3>
+            </div>
+            <div class="row">
+                <input type="number" id="gestureNum" class="bottom">
+            </div>
+            <div class="row">
+                <button id="gestureSave">Save</button>
+            </div>
+
+            <div class="row">
+                <h3>Output neurons</h3>
+            </div>
+            <div class="progress-bar" id="progress1">
+                <div class="progress-fill" style="width: 0;"></div>
+                <div class="progress-text">0</div>
+            </div>
+            <div class="progress-bar" id="progress2">
+                <div class="progress-fill" style="width: 0;"></div>
+                <div class="progress-text">0</div>
+            </div>
+            <div class="progress-bar" id="progress3">
+                <div class="progress-fill" style="width: 0;"></div>
+                <div class="progress-text">0</div>
+            </div>
+            <div class="progress-bar" id="progress4">
+                <div class="progress-fill" style="width: 0;"></div>
+                <div class="progress-text">0</div>
+            </div>
+        </div>
+    </div>
+    <button id="restart">Restart recipient</button>
+    <button id="stopResume">STOP</button>
+</div>
+</body>
+</html>
+
+
+<script>
+    let ctx = document.getElementById('gestureChart').getContext('2d');
+
+    var myDatasets = [];
+
+    myDatasets.push({
+        label: 'Filtered signal',
+        borderColor: 'rgb(0, 0, 255)',
+        backgroundColor: 'rgba(0,0,255, 0.4)',
+        data: [],
+        pointRadius: 0
+    }, {
+        label: 'Pure signal',
+        fill: false,
+        backgroundColor: 'rgba(75,192,192,0.4)',
+        borderColor: 'rgba(75,192,192,0.4)',
+        tension: 0.1,
+        pointRadius: 0
+    });
+
+    // for (var i = 0; i < 20; i++) {
+    //     myDatasets.push({
+    //         label: 'Memory',
+    //         fill: false,
+    //         borderColor: 'rgb(75, 192, 192)',
+    //         backgroundColor: 'rgba(75,192,192,0.4)',
+    //         borderColor: 'rgba(75,192,192,0.4)',
+    //         tension: 0.1,
+    //         pointRadius: 0
+    //     });
+    // }
+
+    let chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: myDatasets
+        },
+        options: {
+            plugins: {
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                },
+                title: {
+                    display: true,
+                    text: 'Gesture chart'
+                }
+            },
+            scales: {
+                x: {
+                    color: 'black',
+                    display: true,
+                    ticks: {
+                        color: 'black', // изменить цвет надписей на оси y
+                        // stepSize: 50,
+                        // max: 20,
+                        maxTicksLimit: 20,
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.3)' // изменить цвет линий фона на оси x
+                    }
+                },
+                y: {
+                    color: 'black',
+                    // suggestedMin: -0.3,
+                    // suggestedMax: 0.4,
+                    min: -0.3,
+                    max: 0.4,
+                    display: true,
+                    ticks: {
+                        color: 'black', // изменить цвет надписей на оси y
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.3)' // изменить цвет линий фона на оси x
+                    }
+                }
+            },
+            responsive: true,
+            animation: false
+        }
+    });
+
+    const numberInput = document.getElementById('refreshTime');
+    let enteredNumber = 1000;
+    numberInput.value = enteredNumber;
+
+
+    numberInput.addEventListener('input', function () {
+        enteredNumber = numberInput.value;
+    });
+
+
+    const minScale = document.getElementById('minScale');
+    const maxScale = document.getElementById('maxScale');
+    minScale.value = chart.options.scales.y.min
+    maxScale.value = chart.options.scales.y.max
+
+    minScale.addEventListener('input', function () {
+        chart.options.scales.y.min = minScale.value;
+        chart.update();
+    });
+
+    maxScale.addEventListener('input', function () {
+        chart.options.scales.y.max = maxScale.value;
+        chart.update();
+    });
+
+
+    function saveGesture(gesture) {
+        fetch('/api/gesture', {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify(gesture)
+        }).then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Network response was not ok.');
+        })
+    }
+
+    document.getElementById('gestureSave').addEventListener('click', function () {
+        let gesture = {
+            gestureNum: document.getElementById('gestureNum').value,
+            signal: chart.data.datasets[0].data
+        };
+        saveGesture(gesture);
+    });
+
+
+    const currentPageUrl = new URL(window.location.href);
+    const name = currentPageUrl.searchParams.get("name");
+    let numberArray;
+
+
+    fetch('/api/config?name=' + name)
+        .then(response => response.json())
+        .then(data => {
+            const number = data.gestureSize;
+            numberArray = Array.from({length: number}, (_, index) => index + 1);
+            chart.data.labels = numberArray;
+        })
+        .catch(error => {
+            console.error('Произошла ошибка при обработке запроса:', error);
+        });
+
+    let a = 0;
+    let timeMain = 0;
+    let timeMemory = 0;
+
+    const buttonStopResume = document.getElementById('stopResume');
+    let stopResume = true;
+
+    buttonStopResume.addEventListener('click', function () {
+        if (stopResume) {
+            buttonStopResume.textContent = 'RESUME';
+            stopResume = false
+        } else {
+            buttonStopResume.textContent = 'STOP';
+            stopResume = true
+        }
+    });
+
+    function updateProgress(progressId, value) {
+        const progressBar = document.getElementById(progressId);
+        const progressFill = progressBar.querySelector('.progress-fill');
+        const progressText = progressBar.querySelector('.progress-text');
+
+        progressFill.style.width = value * 100 + '%';
+        progressText.textContent = value;
+    }
+
+
+    function fetchData() {
+        fetch("/api/gesture?name=" + name)
+            .then(response => response.json())
+            .then(data => {
+                // if (a > 0 && a <= 20 && timeMain !== data.predictionTime) {
+                //     chart.data.datasets[a].data = chart.data.datasets[0].data;
+                //     a++;
+                // }
+                // else if (timeMain !== data.predictionTime) {
+                //     a = 1;
+                // }
+                //
+                // if (a === 0)
+                //     a++;
+
+                if (stopResume) {
+                    chart.data.datasets[0].data = data.inputSignal;
+                    chart.data.datasets[1].data = data.pureInputSignal;
+                    timeMain = data.predictionTime;
+
+                    updateProgress('progress1', data.outputNeurons[0]);
+                    updateProgress('progress2', data.outputNeurons[1]);
+                    updateProgress('progress3', data.outputNeurons[2]);
+                    updateProgress('progress4', data.outputNeurons[3]);
+
+                    chart.update();
+                }
+            })
+            .catch(error => console.error('Ошибка:', error));
+
+        setTimeout(fetchData, enteredNumber);
+        // setTimeout(fetchData, 40000);
+    }
+    const eventSource = new EventSource("/api/chart/spectrum?name=" + name);
+
+    document.getElementById('restart').addEventListener('click', function (event) {
+        event.preventDefault();
+
+        fetch('/api/chart?name=' + name, {
+            method: 'POST',
+        })
+            .catch(error => {
+                console.error('Произошла ошибка:', error);
+            });
+    });
+
+    fetchData();
+</script>

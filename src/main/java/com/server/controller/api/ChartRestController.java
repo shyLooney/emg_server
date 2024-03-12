@@ -1,12 +1,11 @@
 package com.server.controller.api;
 
+import com.server.chip.ChartInfo;
 import com.server.chip.Chip;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping(path = "api/chart",
@@ -18,21 +17,37 @@ public class ChartRestController {
         this.chipMap = chipMap;
     }
 
-    @GetMapping("/{name}")
-    public Map<String, List<Object>> getChartData(@PathVariable("name") String name) {
+    @GetMapping
+    public Map<String, List<? extends Number>> getChartData(@RequestParam("name") String name,
+                                                  @RequestParam(value = "type", defaultValue = "default") String type) {
+        Map<String, List<? extends Number>> chartData = new HashMap<>();
 
         if (!chipMap.containsKey(name)) {
-            return new HashMap<>();
+            return null;
         }
 
-        List<Object> labels = new ArrayList<>(chipMap.get(name).getSignalRecipient().getTime());
-        List<Object> values = new ArrayList<>(chipMap.get(name).getSignalRecipient().getSignalBuffer());
+        Chip chip = chipMap.get(name);
 
-        Map<String, List<Object>> chartData = new HashMap<>();
-        chartData.put("labels", labels);
-        chartData.put("values", values);
-
+        if (type.equals("pure")) {
+            var values = new ArrayList<>(chip.getPureSignal());
+            chartData.put("values", values);
+        } else {
+            var kalman = new ArrayList<>(chip.getKalmanFilter());
+            var def = new ArrayList<>(chip.getDefaultFilter());
+            var without = new ArrayList<>(chip.getWithoutFilter());
+            chartData.put("values", kalman);
+            chartData.put("default", def);
+            chartData.put("valuesNoFilter", without);
+        }
 
         return chartData;
+    }
+
+    @PostMapping
+    public void reconnect(@RequestParam("name") String name) {
+        if (!chipMap.containsKey(name)) {
+            return;
+        }
+        chipMap.get(name).start();
     }
 }

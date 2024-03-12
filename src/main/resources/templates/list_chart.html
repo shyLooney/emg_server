@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        canvas {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+    </style>
+</head>
+<body>
+<div style="width: 1200px;">
+    <canvas id="list-chart"></canvas>
+</div>
+
+
+<script>
+    numberArray = Array.from({length: 2000}, (_, index) => index + 1);
+    const data = {
+        labels: numberArray,
+        datasets: [
+            {
+                label: 'Линия 1',
+                data: [10, 20, 15, 25, 30],
+                borderColor: 'red',
+                fill: false
+            },
+            {
+                label: 'Линия 2',
+                data: [5, 15, 10, 20, 25],
+                borderColor: 'blue',
+                fill: false
+            },
+        ]
+    };
+
+    const options = {
+        responsive: true,
+        maintainAspectRatio: false
+    };
+
+    let ctx = document.getElementById('list-chart').getContext('2d');
+    let chart = new Chart(ctx, {
+        type: 'line',
+        data: data,
+        options: {
+            scales: {
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Time'
+                    }
+                },
+                y: {
+                    // suggestedMin: -0.3,
+                    // suggestedMax: 0.4,
+                    min: -0.3,
+                    max: 0.4,
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Value'
+                    },
+                }
+            },
+            responsive: true,
+            animation: false
+        }
+    });
+
+
+    const maxCharsPerLine = 2000;
+    let chartText = '';
+    let info;
+
+    fetch("/api/chart?name=" + name + "&type=default")
+        .then(response => response.json())
+        .then(data => {
+            info = data.values;
+
+            info.forEach(value => {
+                const barLength = Math.floor(value / 2);
+                const bar = '*'.repeat(barLength);
+                chartText += `${bar}\n`;
+
+                if (chartText.length > maxCharsPerLine) {
+                    chartText += '\n'; // Перенос на новую строку
+                }
+            });
+
+            chart.innerText = chartText;
+        });
+
+
+
+</script>
+</body>
+</html>

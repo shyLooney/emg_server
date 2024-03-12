@@ -1,6 +1,11 @@
 package com.server.controller.web;
 
+import com.server.ConfigLoader;
 import com.server.chip.Chip;
+import com.server.chip.RecipientConfig;
+import com.server.model.DefaultNeuronModel;
+import com.server.model.NeuronModel;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
@@ -15,11 +20,16 @@ import java.util.Map;
 @RequestMapping("/registration")
 public class RegisterChipController {
     Map<String, Chip> chipMap;
+    ConfigLoader configLoader;
+    SimpMessagingTemplate simpMessagingTemplate;
 
-    public RegisterChipController(Map<String, Chip> chipMap) {
+    public RegisterChipController(Map<String, Chip> chipMap,
+                                  ConfigLoader configLoader,
+                                  SimpMessagingTemplate simpMessagingTemplate) {
         this.chipMap = chipMap;
+        this.configLoader = configLoader;
+        this.simpMessagingTemplate = simpMessagingTemplate;
     }
-
 
     @GetMapping
     public String registration() {
@@ -33,6 +43,15 @@ public class RegisterChipController {
         if (errors.hasErrors()) {
             return "/registration";
         }
+
+        NeuronModel neuronModel = new DefaultNeuronModel();
+
+        chip.setNeuronModel(neuronModel);
+        chip.setConfig(new RecipientConfig(configLoader));
+        chip.setSimpMessagingTemplate(simpMessagingTemplate);
+
+
+        System.out.println(configLoader);
 
         chipMap.put(chip.getName(), chip);
         for (var item : chipMap.values())

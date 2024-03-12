@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Line Chart with D3.js</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+<h1>Real-time Line Chart with D3.js</h1>
+<div id="chart"></div>
+
+<script>
+    // const svg = d3.select("#chart")
+    //         .append("svg")
+    //         .attr("width", 400)
+    //         .attr("height", 200);
+    //
+    // // Начальные данные
+    // let data = [];
+    // updateData();
+    //
+    // // Функция обновления данных
+    // function updateData() {
+    //   // Генерация случайных данных
+    //   data.push(Math.random() * 100);
+    //
+    //   // Обновление линии на графике
+    //   const line = d3.line()
+    //           .x((d, i) => i * 40)
+    //           .y(d => 200 - d);
+    //
+    //   svg.selectAll("*").remove(); // Очистить график перед перерисовкой
+    //
+    //   svg.append("path")
+    //           .datum(data)
+    //           .attr("fill", "none")
+    //           .attr("stroke", "steelblue")
+    //           .attr("stroke-width", 2)
+    //           .attr("d", line);
+    //
+    //   // Обновляем данные каждую секунду
+    //   setTimeout(updateData, 1000);
+    // }
+
+    // Set the dimensions of the chart
+    const margin = {top: 20, right: 30, bottom: 30, left: 40};
+    const width = 1400 - margin.left - margin.right;
+    const height = 600 - margin.top - margin.bottom;
+
+    // Create the SVG element
+    const svg = d3.select('#chart')
+        .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Initialize data
+    let data = [];
+    const n = 10000;
+
+    const line = d3.line()
+        .x((d, i) => x(i * 0.1))
+        .y(d => y(d));
+
+    // Create scales
+    const x = d3.scaleLinear().domain([0, 1000]).range([0, width]); // Умножаем на 0.1 для чисел с плавающей запятой
+    const y = d3.scaleLinear().domain([-0.5, 0.5]).range([height, 0]);
+
+    // Create X axis
+    svg.append('g')
+        .attr('transform', `translate(0,${height})`)
+        .call(d3.axisBottom(x).tickFormat(d3.format(".1f"))); // Форматируем числа на оси X
+
+    // Create Y axis
+    svg.append('g')
+        .call(d3.axisLeft(y));
+
+    const f = d3.format("+.0");
+    const format = x => x === 1 ? "0" : 1;
+
+    // svg.append("g")
+    //     .attr("transform", `translate(${margin.left},0)`)
+    //     .call(d3.axisLeft(y)
+    //         .tickValues(d3.ticks(...y.domain(), 10)))
+    //         // .tickFormat(format))
+    //     .call(g => g.selectAll(".tick line").clone()
+    //         .attr("stroke-opacity", d => d === 1 ? null : 0.2)
+    //         .attr("x2", width - margin.left - margin.right))
+    //     .call(g => g.select(".domain").remove());
+
+    // Add path for the line
+    const path = svg.append('path')
+        .datum(data)
+        .attr('fill', 'none')
+        .attr('stroke', 'steelblue')
+        .attr('stroke-width', 2)
+        .attr('d', line);
+
+    // Function to update data and redraw the line
+    function update(data) {
+        path.datum(data)
+            .attr('d', line);
+    }
+
+    const currentPageUrl = new URL(window.location.href);
+    const name = currentPageUrl.searchParams.get("name");
+    // Update chart every 500ms
+    setInterval(function () {
+
+        fetch("/api/chart?name=" + name + "&type=default")
+                .then(response => response.json())
+                .then(answer => {
+                  // data.values.forEach(value => {
+                  //     chart.data.datasets[0].data.push(value);
+                  // });
+                  //
+                  // if (chart.data.datasets[0].data.length > 10000) {
+                  //     chart.data.datasets[0].data.splice(0, chart.data.datasets[0].data.length - 10000);
+                  // }
+                  // chart.data.datasets[0].data = data.default;
+                  // chart.data.datasets[1].data = data.valuesNoFilter;
+                  //
+                  // chart.update();
+
+                    answer.default.forEach(val => {
+                        data.push(val); // Generate random data point
+
+                        if (data.length > n) {
+                            data.shift(); // Remove the first data point
+                        }
+                    })
+
+                });
+
+        update(data); // Update the line
+    }, 300);
+</script>
+
+</body>
+</html>

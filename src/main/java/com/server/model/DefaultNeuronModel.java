@@ -1,25 +1,23 @@
 package com.server.model;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.tensorflow.*;
 import org.tensorflow.exceptions.TensorFlowException;
-import org.tensorflow.ndarray.FloatNdArray;
-import org.tensorflow.ndarray.NdArrays;
 import org.tensorflow.ndarray.Shape;
+import org.tensorflow.op.train.ApplyGradientDescent;
 import org.tensorflow.types.TFloat32;
 
 import java.util.Arrays;
 
 //@Component
 @Slf4j
-public class DefaultModel implements Model {
+public class DefaultNeuronModel implements NeuronModel {
     private SavedModelBundle model;
     private Session session;
     private final int OUTPUT_SIZE = 4;
     private final int INPUT_SIZE = 2000;
 
-    public DefaultModel() {
+    public DefaultNeuronModel() {
         loadModel();
     }
 
@@ -52,11 +50,12 @@ public class DefaultModel implements Model {
              Result result = session.runner()
                      .feed("serving_default_reshape_1_input", inputs)
                      .fetch("StatefulPartitionedCall")
-                     .run();) {
+                     .run();
+             Tensor val = result.get(0);
+             RawTensor rawTensor = val.asRawTensor();) {
+
             float[] output = new float[OUTPUT_SIZE];
 
-            Tensor val = result.get(0);
-            RawTensor rawTensor = val.asRawTensor();
             for (int i = 0; i < OUTPUT_SIZE; i++) {
                 output[i] = rawTensor.data().asFloats().getFloat(i);
             }

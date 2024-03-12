@@ -42,11 +42,22 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
+<!--		&lt;!&ndash; https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-rsocket &ndash;&gt;-->
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.boot</groupId>-->
+<!--			<artifactId>spring-boot-starter-rsocket</artifactId>-->
+<!--			<version>3.2.3</version>-->
+<!--		</dependency>-->
 
 		<!-- https://mvnrepository.com/artifact/org.tensorflow/tensorflow-core-api -->
 		<dependency>
@@ -77,6 +88,59 @@
 			<groupId>org.bytedeco</groupId>
 			<artifactId>javacpp</artifactId>
 			<version>1.5.8</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.ejml/ejml-core -->
+		<dependency>
+			<groupId>org.ejml</groupId>
+			<artifactId>ejml-core</artifactId>
+			<version>0.43.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.ejml/ejml-simple -->
+		<dependency>
+			<groupId>org.ejml</groupId>
+			<artifactId>ejml-simple</artifactId>
+			<version>0.43.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.6.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.github.psambit9791/jdsp -->
+		<dependency>
+			<groupId>com.github.psambit9791</groupId>
+			<artifactId>jdsp</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.tambapps.fft4j/fft4j -->
+		<dependency>
+			<groupId>com.tambapps.fft4j</groupId>
+			<artifactId>fft4j</artifactId>
+			<version>2.0</version>
+		</dependency>
+
+
+
+		<!-- https://mvnrepository.com/artifact/net.lingala.zip4j/zip4j -->
+		<dependency>
+			<groupId>net.lingala.zip4j</groupId>
+			<artifactId>zip4j</artifactId>
+			<version>2.11.5</version>
+		</dependency>
+
+
+		<!-- https://mvnrepository.com/artifact/io.projectreactor/reactor-core -->
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-core</artifactId>
+			<version>3.6.3</version>
+		</dependency>
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-test</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

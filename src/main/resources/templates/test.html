@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+<!--    <script src="./js/sockjs-0.3.4.js"></script>-->
+<!--    <script src="./js/stomp.js"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@5.0.0/bundles/stomp.umd.min.js"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@5.0.0/bundles/stomp.umd.js"></script>-->
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+    <script src="stomp.js"></script>
+
+
+</head>
+<body>
+
+<script>
+    var stompClient = null;
+
+    function connect() {
+        // var socket = new SockJS('ws://localhost:8080');
+        var socket = new SockJS('portfolio');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/topic/portfolio', function (response) {
+                var floatList = JSON.parse(response.body);
+                console.log('Received float list: ' + floatList);
+            });
+        });
+    }
+
+    connect();
+</script>
+</body>
+</html>
