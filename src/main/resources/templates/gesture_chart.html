@@ -2,7 +2,9 @@
 <html>
 <head>
     <title>Real-time Chart Example</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!--    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
+    <script src="chart.js"></script>
+
     <style>
         canvas {
             -moz-user-select: none;
@@ -97,7 +99,10 @@
                 <h3>Gesture save</h3>
             </div>
             <div class="row">
-                <input type="number" id="gestureNum" class="bottom">
+                <input type="text" id="gestureNum" class="bottom">
+            </div>
+            <div class="row">
+                <input type="checkbox" id="autosave" class="bottom">Autosave</input>
             </div>
             <div class="row">
                 <button id="gestureSave">Save</button>
@@ -323,6 +328,15 @@
                 //     a++;
 
                 if (stopResume) {
+                    if (JSON.stringify(data.inputSignal) != JSON.stringify(chart.data.datasets[0].data) &&
+                        document.getElementById("autosave").checked) {
+                        let gesture = {
+                            gestureNum: document.getElementById('gestureNum').value,
+                            signal: data.inputSignal
+                        };
+                        saveGesture(gesture);
+                    }
+
                     chart.data.datasets[0].data = data.inputSignal;
                     chart.data.datasets[1].data = data.pureInputSignal;
                     timeMain = data.predictionTime;
@@ -331,6 +345,7 @@
                     updateProgress('progress2', data.outputNeurons[1]);
                     updateProgress('progress3', data.outputNeurons[2]);
                     updateProgress('progress4', data.outputNeurons[3]);
+
 
                     chart.update();
                 }

@@ -1,8 +1,6 @@
 package com.server.controller.api;
 
 import com.server.chip.Chip;
-import com.tambapps.fft4j.Signal;
-import com.tambapps.fft4j.algorithm.BasicFastFourier;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;

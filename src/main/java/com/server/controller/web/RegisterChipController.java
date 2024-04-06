@@ -3,6 +3,9 @@ package com.server.controller.web;
 import com.server.ConfigLoader;
 import com.server.chip.Chip;
 import com.server.chip.RecipientConfig;
+import com.server.chip.SignalRecipient;
+import com.server.filter.DefaultFilter;
+import com.server.filter.MeanFilter;
 import com.server.model.DefaultNeuronModel;
 import com.server.model.NeuronModel;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -22,6 +25,8 @@ public class RegisterChipController {
     Map<String, Chip> chipMap;
     ConfigLoader configLoader;
     SimpMessagingTemplate simpMessagingTemplate;
+    private DefaultFilter defaultFilter = new DefaultFilter();
+    private MeanFilter meanFilter = new MeanFilter();
 
     public RegisterChipController(Map<String, Chip> chipMap,
                                   ConfigLoader configLoader,
@@ -45,14 +50,29 @@ public class RegisterChipController {
         }
 
         NeuronModel neuronModel = new DefaultNeuronModel();
+        RecipientConfig recipientConfig = new RecipientConfig(configLoader);
 
-        chip.setNeuronModel(neuronModel);
-        chip.setConfig(new RecipientConfig(configLoader));
-        chip.setSimpMessagingTemplate(simpMessagingTemplate);
+//        recipientConfig.setNeuronModel(neuronModel);
+//        recipientConfig.setConfig(new RecipientConfig(configLoader));
+//        recipientConfig.setSimpMessagingTemplate(simpMessagingTemplate);
 
 
-        System.out.println(configLoader);
+        chip.setRecipientConfig(new RecipientConfig(configLoader));
 
+        SignalRecipient signalRecipient = new SignalRecipient();
+        signalRecipient.setNeuronModel(neuronModel)
+                .setSimpMessagingTemplate(simpMessagingTemplate)
+                .setRecipientConfig(chip.getConfig())
+                .setNameEndPoint(chip.getName());
+        signalRecipient.addFilter(defaultFilter);
+        signalRecipient.addFilter(meanFilter);
+
+        chip.setSignalRecipient(signalRecipient);
+        chipMap.put(chip.getName(), chip);
+        chip.start();
+
+
+        chip.start();
         chipMap.put(chip.getName(), chip);
         for (var item : chipMap.values())
             System.out.println(item);

@@ -12,15 +12,15 @@ import java.util.ArrayList;
 @Data
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class GestureSaver {
-    private int gestureNum;
+    private String gestureNum;
     private ArrayList<Float> signal;
 
-    public GestureSaver(int gestureNum, ArrayList<Float> signal) {
+    public GestureSaver(String gestureNum, ArrayList<Float> signal) {
         this.gestureNum = gestureNum;
         this.signal = signal;
     }
 
-    private void createFolder(int folderNum) {
+    private void createFolder(String folderNum) {
         File gestureNum = new File("gestures/" + folderNum);
         if (!gestureNum.exists()) {
             gestureNum.mkdirs();

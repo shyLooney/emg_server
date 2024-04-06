@@ -1,11 +1,11 @@
-package com.server;
+package com.server.filter;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class Filter {
+public class DefaultFilter implements Filter {
 //    static private Filter filter = null;
 //    private double[] m_circBuf;
 //    private double[] m_impResp;
@@ -14,7 +14,7 @@ public class Filter {
     private ArrayList<Double> m_circBuf;
 
 
-    public Filter() {
+    public DefaultFilter() {
         m_impResp = new ArrayList<Double>();
         try (Scanner scanner = new Scanner(new File("filter.txt"))) {
             while (scanner.hasNextLine()) {
@@ -66,4 +66,22 @@ public class Filter {
     }
 
 
+    @Override
+    public double[] calculate(double... sample) {
+        double[] filtered = new double[sample.length];
+
+        for (int i = 0; i < sample.length; i++) {
+            m_circBuf.set(m_head, sample[i]);
+            m_head = (m_head + 1) % m_impResp.size();
+            double out_sample = 0.0 ;
+
+            for (int nTap=0; nTap < m_impResp.size(); nTap++) {
+                out_sample += m_impResp.get(m_impResp.size() - nTap - 1) * m_circBuf.get((m_head + nTap) % m_impResp.size());
+            }
+
+            filtered[i] = out_sample;
+        }
+
+        return filtered;
+    }
 }

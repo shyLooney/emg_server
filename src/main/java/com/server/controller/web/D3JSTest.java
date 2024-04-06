@@ -20,6 +20,6 @@ public class D3JSTest {
     @GetMapping
     public String getD3JS(@RequestParam(value = "name") String name) {
 
-        return "d3js_test";
+        return "demonstrate/realtime_signal";
     }
 }

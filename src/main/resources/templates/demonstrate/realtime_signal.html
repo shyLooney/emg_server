@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Real-time Chart Example</title>
+    <!--    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
+    <script src="../chart.js"></script>
+    <script src="../stomp.js"></script>
+    <script src="../sockjs.min.js"></script>
+    <link rel="stylesheet" href="../demonstrate/styles/main.css">
+    <!--    <link rel="stylesheet" href="../demonstrate/styles/progress.css">-->
+    <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
+    <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-circle-progress/1.2.2/circle-progress.min.js"></script>-->
+
+
+    <style>
+        canvas {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .container {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: 87% 10%;
+        }
+
+        .vbox {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: 5% 5%;
+        }
+
+        .row {
+            display: flex;
+            width: 100%;
+        }
+
+        .row input {
+            flex: 1;
+            padding: 5px;
+            margin: 0 5px 5px 0;
+        }
+
+        .bottom {
+            width: 100%;
+        }
+
+        .row button {
+            width: 97%;
+            height: 40px;
+            margin: 5px 5px 5px 0;
+        }
+    </style>
+</head>
+
+<body>
+<div>
+    <a href="/home">Home</a>
+    <div class="area" id="container">
+        <ul class="circles">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+        <div class="menu">
+            <div class="chart" id="chart" style="height: 97vh; width: 98%; display: flex; align-items: center;">
+                <canvas id="real-time-chart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="row">
+            <h3>Scale</h3>
+        </div>
+        <div class="row">
+            <input type="number" id="minScale" class="row input">
+            <input type="number" id="maxScale" class="row input">
+        </div>
+    </div>
+</div>
+<button id="restart">Restart recipient</button>
+<button onclick="openFullscreen()">Полный экран</button>
+
+<!-- <script>
+    document.getElementById('reset-filter').addEventListener('click', function () {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', currentPageUrl + '/options?action=reset_filter', true);
+        xhr.send();
+    });
+</script> -->
+
+
+<script>
+    var ctx = document.getElementById('real-time-chart').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Default filter',
+                fill: false,
+                borderColor: 'rgb(245, 245, 220)',
+                backgroundColor: 'rgb(254, 207, 96)',
+                tension: 0.1,
+                pointRadius: 0,
+                // borderWidth: 1.2
+            }, {
+                label: 'Without Filter',
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75,192,192,0.5)',
+                tension: 0.1,
+                pointRadius: 0,
+                borderWidth: 1.2
+            }]
+        },
+        options: {
+            plugins: {
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                },
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    color: 'black',
+                    display: false,
+                    ticks: {
+                        color: 'black' // изменить цвет надписей на оси x
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.5)' // изменить цвет линий фона на оси x
+                    }
+                },
+                y: {
+                    // min: -0.5,
+                    // max: 0.5,
+                    display: false,
+                    ticks: {
+                        color: 'black' // изменить цвет надписей на оси y
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.5)' // изменить цвет линий фона на оси x
+                    }
+                }
+            },
+            // animation: {
+            //     duration: 10, // длительность анимации в миллисекундах
+            //     easing: 'easeInOutQuart' // тип анимации (например, linear, easeInQuad, easeOutBounce и т. д.)
+            // },
+            maintainAspectRatio: false,
+            responsive: true,
+            animation: false
+        }
+    });
+
+
+    const minScale = document.getElementById('minScale');
+    const maxScale = document.getElementById('maxScale');
+    minScale.value = -0.2;
+    maxScale.value = 0.2;
+    chart.options.scales.y.min = -0.2;
+    chart.options.scales.y.max = 0.2;
+
+    minScale.addEventListener('input', function () {
+        chart.options.scales.y.min = minScale.value;
+        chart.update();
+    });
+
+    maxScale.addEventListener('input', function () {
+        chart.options.scales.y.max = maxScale.value;
+        chart.update();
+    });
+
+    const currentPageUrl = new URL(window.location.href);
+    const name = currentPageUrl.searchParams.get("name");
+    let number;
+
+    // const number = 10000;
+    // numberArray = Array.from({length: number}, (_, index) => index + 1);
+    // chart.data.labels = numberArray;
+
+    fetch('/api/config?name=' + name)
+        .then(response => response.json())
+        .then(data => {
+            number = data.graphLen;
+            numberArray = Array.from({length: number}, (_, index) => index + 1);
+            chart.data.labels = numberArray;
+            // console.log(numberArray);
+        })
+        .catch(error => {
+            console.error('Произошла ошибка при обработке запроса:', error);
+        });
+
+    var socket = new SockJS("/portfolio");
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function (frame) {
+        stompClient.subscribe('/topic/portfolio/chart?name=' + name, function (response) {
+            // console.log(response.body);
+            var floatList = JSON.parse(response.body);
+            // console.log('Received float list: ' + floatList);
+
+            // chart.data.labels = floatList.labels;
+            floatList.forEach((elem) => {
+                chart.data.datasets[0].data.push(elem);
+            })
+
+            if (chart.data.datasets[0].data.length > number) {
+                chart.data.datasets[0].data.splice(0, chart.data.datasets[0].data.length - number);
+            }
+
+            // chart.data.datasets[a].data = 1;
+            // chart.data.datasets[a].labels = a;
+            chart.update();
+        });
+    });
+
+    // function fetchData() {
+    //     fetch("/api/chart?name=" + name + "&type=default")
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             // data.values.forEach(value => {
+    //             //     chart.data.datasets[0].data.push(value);
+    //             // });
+    //             //
+    //             // if (chart.data.datasets[0].data.length > 10000) {
+    //             //     chart.data.datasets[0].data.splice(0, chart.data.datasets[0].data.length - 10000);
+    //             // }
+    //             chart.data.datasets[0].data = data.default;
+    //             chart.data.datasets[1].data = data.valuesNoFilter;
+    //
+    //             chart.update();
+    //
+    //         });
+    //     // .catch(error => console.error('Ошибка:', error));
+    //
+    //     setTimeout(fetchData, enteredNumber);
+    //     // setTimeout(fetchData, 40000);
+    // }
+
+    function fetchPrediction() {
+        fetch("/api/predict/" + name)
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('prediction').textContent = data;
+            })
+            .catch(error => {
+                console.error("Произошла ошибка при чтении значения с сервера:", error);
+            });
+
+        setTimeout(fetchPrediction, 200);
+        // setTimeout(fetchPrediction, 20000);
+    }
+
+    document.getElementById('restart').addEventListener('click', function (event) {
+        event.preventDefault();
+
+        fetch('/api/chart?name=' + name, {
+            method: 'POST',
+        })
+            .catch(error => {
+                console.error('Произошла ошибка:', error);
+            });
+    });
+
+    function openFullscreen() {
+        var elem = document.getElementById("container");
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.mozRequestFullScreen) { /* Firefox */
+            elem.mozRequestFullScreen();
+        } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE/Edge */
+            elem.msRequestFullscreen();
+        }
+    }
+
+    // fetchData();
+    // fetchPrediction();
+</script>
+</body>
+
+</html>

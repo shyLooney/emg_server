@@ -1,14 +1,14 @@
 package com.server.chip;
 
 import com.server.ConfigLoader;
+import com.server.filter.DefaultFilter;
+import com.server.filter.MeanFilter;
 import com.server.model.DefaultNeuronModel;
 import com.server.model.NeuronModel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,10 @@ import java.util.Map;
 @Configuration
 public class ChipsConfiguration {
     private ConfigLoader config;
-    SimpMessagingTemplate simpMessagingTemplate;
+    private SimpMessagingTemplate simpMessagingTemplate;
+    private DefaultFilter defaultFilter = new DefaultFilter();
+    private MeanFilter meanFilter = new MeanFilter();
+
     public ChipsConfiguration(ConfigLoader config,
                               SimpMessagingTemplate simpMessagingTemplate) {
         this.config = config;
@@ -30,16 +33,32 @@ public class ChipsConfiguration {
 
         Chip chip = new Chip()
                 .setName("dmacmill")
-                .setIp("192.168.1.101")
-                .setPort(3000)
-                .setNeuronModel(neuronModel)
-                .setRecipientConfig(new RecipientConfig(config));
-        chip.setSimpMessagingTemplate(simpMessagingTemplate);
+                .setIp("192.168.22.91")
+                .setPort(3000);
 
+        chip.setRecipientConfig(new RecipientConfig(config));
 
+        SignalRecipient signalRecipient = new SignalRecipient();
+        signalRecipient.setNeuronModel(neuronModel)
+                .setSimpMessagingTemplate(simpMessagingTemplate)
+                .setRecipientConfig(chip.getConfig())
+                .setNameEndPoint(chip.getName());
+        signalRecipient.addFilter(defaultFilter);
+        signalRecipient.addFilter(meanFilter);
+
+        chip.setSignalRecipient(signalRecipient);
         chipMap.put(chip.getName(), chip);
         chip.start();
         return chipMap;
     }
 
+    @Bean
+    public DefaultFilter defaultFilter() {
+        return defaultFilter;
+    }
+
+    @Bean
+    public MeanFilter filterMean() {
+        return meanFilter;
+    }
 }

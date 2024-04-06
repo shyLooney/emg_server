@@ -16,11 +16,11 @@ spring:
 #      transport: "websocket"
 
 recipient:
-  graphLen: 10000
-  sigScale: 0.0001
+  graphLen: 12000
+  sigScale: 0.00001
   gestureSize: 2000
   packetSize: 528
-  threshold: 0.01
+  threshold: 0.05
   waitingConnectionTimeout: 10000
   waitingReadTimeout: 5000
 

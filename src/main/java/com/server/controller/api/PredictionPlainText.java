@@ -34,6 +34,8 @@ public class PredictionPlainText {
         }
         stringBuilder.delete(stringBuilder.length() - 1, stringBuilder.length());
 
+//        System.out.println("READ API");
+
         return stringBuilder.toString();
     }
 }

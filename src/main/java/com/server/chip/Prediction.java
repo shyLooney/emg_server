@@ -8,7 +8,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Data
 public class Prediction {
     private volatile long predictionTime;
-    private volatile CopyOnWriteArrayList<Float> outputNeurons;
+    private CopyOnWriteArrayList<Float> outputNeurons;
     private CopyOnWriteArrayList<Float> inputSignal;
     private CopyOnWriteArrayList<Float> pureInputSignal;
 

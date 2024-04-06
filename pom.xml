@@ -21,10 +21,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.boot</groupId>-->
+<!--			<artifactId>spring-boot-starter-web</artifactId>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -52,12 +52,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
-<!--		&lt;!&ndash; https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-rsocket &ndash;&gt;-->
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.boot</groupId>-->
-<!--			<artifactId>spring-boot-starter-rsocket</artifactId>-->
-<!--			<version>3.2.3</version>-->
-<!--		</dependency>-->
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-rsocket -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-rsocket</artifactId>
+			<version>3.2.3</version>
+		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.tensorflow/tensorflow-core-api -->
 		<dependency>
@@ -114,12 +114,12 @@
 			<artifactId>jdsp</artifactId>
 			<version>3.0.0</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.tambapps.fft4j/fft4j -->
-		<dependency>
-			<groupId>com.tambapps.fft4j</groupId>
-			<artifactId>fft4j</artifactId>
-			<version>2.0</version>
-		</dependency>
+<!--		&lt;!&ndash; https://mvnrepository.com/artifact/com.tambapps.fft4j/fft4j &ndash;&gt;-->
+<!--		<dependency>-->
+<!--			<groupId>com.tambapps.fft4j</groupId>-->
+<!--			<artifactId>fft4j</artifactId>-->
+<!--			<version>2.0</version>-->
+<!--		</dependency>-->
 
 
 

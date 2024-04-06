@@ -48,6 +48,6 @@ public class ChartRestController {
         if (!chipMap.containsKey(name)) {
             return;
         }
-        chipMap.get(name).start();
+        chipMap.get(name).restart();
     }
 }

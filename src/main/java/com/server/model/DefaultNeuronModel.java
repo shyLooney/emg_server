@@ -48,7 +48,7 @@ public class DefaultNeuronModel implements NeuronModel {
                      Shape.of(1).append(INPUT_SIZE),
                      vector.asRawTensor().data());
              Result result = session.runner()
-                     .feed("serving_default_reshape_1_input", inputs)
+                     .feed("serving_default_reshape_input:0", inputs)
                      .fetch("StatefulPartitionedCall")
                      .run();
              Tensor val = result.get(0);
