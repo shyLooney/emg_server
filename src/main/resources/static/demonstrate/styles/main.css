@@ -139,7 +139,7 @@ body{
 	align-items: center;
 	justify-content: center;
 	width: 98%;
-	height: 71vh;
+	height: 65vh;
     /* border: 4px solid #fecd5f; */
     border: 4px solid #f5f5dc;
     /*border: 4px solid #193C62;*/
@@ -235,9 +235,9 @@ body{
 
 .row {
 	display: flex;
-	width: 100%;
+	/*width: 100%;*/
 	display: inline-block;
-    width: 26%;
+    width: 23%;
     padding: 10px;
     margin: 5px;
 	

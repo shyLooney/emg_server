@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Real-time Chart Example</title>
+    <script src="../chart.js"></script>
+    <script src="../stomp.js"></script>
+    <script src="../sockjs.min.js"></script>
+    <link rel="stylesheet" href="../demonstrate/styles/main.css">
+    <link rel="stylesheet" href="../demonstrate/styles/progress.css">
+    <script src="../jquery.min.js"></script>
+    <script src="../circle-progress.min.js"></script>
+
+    <style>
+        canvas {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .container {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: 83% 15%;
+            margin: 0 0 0 0px;
+        }
+
+
+        .vbox {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: 5% 5%;
+        }
+
+
+        .row input {
+            flex: 1;
+            padding: 5px;
+            margin: 0 5px 0 0;
+        }
+
+        .bottom {
+            width: 100%;
+        }
+
+        .row button {
+            width: 97%;
+            height: 40px;
+            margin: 5px 5px 5px 0;
+        }
+
+        .progress-bar {
+            width: 97%;
+            height: 30px;
+            background-color: lightgray;
+            border: 1px solid gray;
+            margin-bottom: 7px;
+            position: relative;
+            display: flex;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: blue;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<div>
+    <a href="/home">Home</a>
+    <div class="area" id="container">
+        <ul class="circles">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+        <div class="menu">
+            <div class="chart">
+                <canvas id="gestureChart"></canvas>
+            </div>
+            <div>
+                <div class="row">
+                    <div class="skillcontainer">
+                        <div class="wrapper">
+                            <div class="card one">
+                                <div class="circle">
+                                    <div class="bar"></div>
+                                    <div class="box"><span></span></div>
+                                </div>
+                                <div class="text">Жест №1</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="skillcontainer">
+                        <div class="wrapper">
+                            <div class="card two">
+                                <div class="circle">
+                                    <div class="bar"></div>
+                                    <div class="box"><span></span></div>
+                                </div>
+                                <div class="text">Жест №2</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="skillcontainer">
+                        <div class="wrapper">
+                            <div class="card three">
+                                <div class="circle">
+                                    <div class="bar"></div>
+                                    <div class="box"><span></span></div>
+                                </div>
+                                <div class="text">Жест №3</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="skillcontainer">
+                        <div class="wrapper">
+                            <div class="card four">
+                                <div class="circle">
+                                    <div class="bar"></div>
+                                    <div class="box"><span></span></div>
+                                </div>
+                                <div class="text">Жест №4</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button id="restart">Restart recipient</button>
+    <button id="stopResume">STOP</button>
+    <button onclick="openFullscreen()">Полный экран</button>
+    <div>
+        <div class="row">
+            <h3>Scale</h3>
+        </div>
+        <div class="row">
+            <input type="number" id="minScale" class="row input">
+            <input type="number" id="maxScale" class="row input">
+        </div>
+    </div>
+</div>
+</body>
+
+</html>
+
+
+<script>
+    let ctx = document.getElementById('gestureChart').getContext('2d');
+
+    var myDatasets = [];
+
+    myDatasets.push({
+        label: 'Filtered signal',
+        fill: false,
+        // borderColor: 'rgb(25, 60, 98)',
+        // borderColor: 'rgb(254, 207, 96)',
+        // borderColor: 'rgb(254, 207, 96)',
+        borderColor: 'rgb(245, 245, 220, 1)',
+        backgroundColor: 'rgb(255, 90, 42)',
+        data: [],
+        tension: 0.1,
+        pointRadius: 0
+    }, {
+        label: 'Pure signal',
+        fill: false,
+        backgroundColor: 'rgb(251, 225, 210, 0.5)',
+        // backgroundColor: 'rgba(75,192,192,0.5)',
+        borderColor: 'rgba(251, 225, 210,0.5)',
+        tension: 0.1,
+        pointRadius: 0
+    });
+
+    // for (var i = 0; i < 20; i++) {
+    //     myDatasets.push({
+    //         label: 'Memory',
+    //         fill: false,
+    //         borderColor: 'rgb(75, 192, 192)',
+    //         backgroundColor: 'rgba(75,192,192,0.4)',
+    //         borderColor: 'rgba(75,192,192,0.4)',
+    //         tension: 0.1,
+    //         pointRadius: 0
+    //     });
+    // }
+
+    let chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: myDatasets
+        },
+        options: {
+            plugins: {
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                },
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    // color: 'black',
+                    display: false,
+                    ticks: {
+                        color: 'black', // изменить цвет надписей на оси y
+                        // stepSize: 50,
+                        // max: 20,
+                        maxTicksLimit: 20,
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.3)' // изменить цвет линий фона на оси x
+                    }
+                },
+                y: {
+                    // color: 'black',
+                    // suggestedMin: -0.3,
+                    // suggestedMax: 0.4,
+                    min: -0.2,
+                    max: 0.2,
+                    display: false,
+                    ticks: {
+                        color: 'black', // изменить цвет надписей на оси y
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.3)' // изменить цвет линий фона на оси x
+                    }
+                }
+            },
+            // animation: {
+            //     duration: 10, // длительность анимации в миллисекундах
+            //     easing: 'easeInOutQuart' // тип анимации (например, linear, easeInQuad, easeOutBounce и т. д.)
+            // },
+            maintainAspectRatio: false,
+            responsive: true,
+            animation: true
+        }
+    });
+
+    const currentPageUrl = new URL(window.location.href);
+    const name = currentPageUrl.searchParams.get("name");
+    let numberArray;
+
+
+    fetch('/api/config?name=' + name)
+        .then(response => response.json())
+        .then(data => {
+            const number = data.gestureSize;
+            numberArray = Array.from({length: number}, (_, index) => index + 1);
+            chart.data.labels = numberArray;
+        })
+        .catch(error => {
+            console.error('Произошла ошибка при обработке запроса:', error);
+        });
+
+    let a = 0;
+    let timeMain = 0;
+    let timeMemory = 0;
+
+    const buttonStopResume = document.getElementById('stopResume');
+    let stopResume = true;
+
+    buttonStopResume.addEventListener('click', function () {
+        if (stopResume) {
+            buttonStopResume.textContent = 'RESUME';
+            stopResume = false
+        } else {
+            buttonStopResume.textContent = 'STOP';
+            stopResume = true
+        }
+    });
+
+    const minScale = document.getElementById('minScale');
+    const maxScale = document.getElementById('maxScale');
+    minScale.value = -0.2;
+    maxScale.value = 0.2;
+    chart.options.scales.y.min = -0.2;
+    chart.options.scales.y.max = 0.2;
+
+    minScale.addEventListener('input', function () {
+        chart.options.scales.y.min = minScale.value;
+        chart.update();
+    });
+
+    maxScale.addEventListener('input', function () {
+        chart.options.scales.y.max = maxScale.value;
+        chart.update();
+    });
+
+    function updateProgress(progressId, value) {
+        const progressBar = document.getElementById(progressId);
+        const progressFill = progressBar.querySelector('.progress-fill');
+        const progressText = progressBar.querySelector('.progress-text');
+
+        progressFill.style.width = value * 100 + '%';
+        progressText.textContent = value;
+    }
+
+
+    function fetchData() {
+        fetch("/api/gesture?name=" + name)
+            .then(response => response.json())
+            .then(data => {
+                // if (a > 0 && a <= 20 && timeMain !== data.predictionTime) {
+                //     chart.data.datasets[a].data = chart.data.datasets[0].data;
+                //     a++;
+                // }
+                // else if (timeMain !== data.predictionTime) {
+                //     a = 1;
+                // }
+                //
+                // if (a === 0)
+                //     a++;
+
+                if (stopResume) {
+                    chart.data.datasets[0].data = data.inputSignal;
+                    chart.data.datasets[1].data = data.pureInputSignal;
+                    timeMain = data.predictionTime;
+
+                    chart.update();
+                }
+            })
+            .catch(error => console.error('Ошибка:', error));
+
+        setTimeout(fetchData, enteredNumber);
+        // setTimeout(fetchData, 40000);
+    }
+
+    var socket = new SockJS("/portfolio");
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function (frame) {
+        stompClient.subscribe('/topic/portfolio/gesture?name=' + name, function (response) {
+            console.log(response.body);
+            var data = JSON.parse(response.body);
+            // console.log('Received float list: ' + floatList);
+
+            // chart.data.labels = floatList.labels;
+
+            chart.data.datasets[0].data = data.inputSignal;
+            chart.data.datasets[1].data = data.pureInputSignal;
+
+            $(".one .bar").circleProgress({
+                value: (data.outputNeurons[0])
+            });
+            $(".two .bar").circleProgress({
+                value: (data.outputNeurons[1])
+            });
+            $(".three .bar").circleProgress({
+                value: (data.outputNeurons[2])
+            });
+            $(".four .bar").circleProgress({
+                value: (data.outputNeurons[3])
+            });
+
+
+            // chart.data.datasets[a].data = 1;
+            // chart.data.datasets[a].labels = a;
+            chart.update();
+        });
+    });
+
+
+    document.getElementById('restart').addEventListener('click', function (event) {
+        event.preventDefault();
+
+        fetch('/api/chart?name=' + name, {
+            method: 'POST',
+        })
+            .catch(error => {
+                console.error('Произошла ошибка:', error);
+            });
+    });
+
+    function openFullscreen() {
+        var elem = document.getElementById("container");
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.mozRequestFullScreen) { /* Firefox */
+            elem.mozRequestFullScreen();
+        } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE/Edge */
+            elem.msRequestFullscreen();
+        }
+    }
+
+    let options = {
+        startAngle: -1.55,
+        size: 150,
+        value: 0,
+        // fill: {gradient: ['#a445b2', '#fa4299']}
+        // fill: {gradient: ['#f2ddc6', '#fecd5f']}
+        // fill: {gradient: ['#a445b2', '#005ac9']}
+        fill: {gradient: ['#a445b2', '#005bf0']}
+    }
+    $(".circle .bar").circleProgress(options).on('circle-animation-progress',
+        function (event, progress, stepValue) {
+            $(this).parent().find("span").text(String(Math.floor(stepValue * 100)) + "%");
+        });
+
+    // fetchData();
+</script>

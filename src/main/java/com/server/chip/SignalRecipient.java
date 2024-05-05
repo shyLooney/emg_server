@@ -118,7 +118,7 @@ public class SignalRecipient implements Runnable {
             System.out.println(simpMessagingTemplate.getMessageChannel());
 
             int counter = 0;
-            int N = 10;
+            int N = 3;
 
             while (!Thread.currentThread().isInterrupted()) {
                 if (counter == N)

@@ -33,7 +33,7 @@ public class ChipsConfiguration {
 
         Chip chip = new Chip()
                 .setName("dmacmill")
-                .setIp("192.168.22.91")
+                .setIp("192.168.108.91")
                 .setPort(3000);
 
         chip.setRecipientConfig(new RecipientConfig(config));

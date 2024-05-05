@@ -29,7 +29,7 @@ public class SimpleMiddlePeakDetector implements GestureDetector {
         if (maxIndex == 1000) {
             if (samples.size() == config.getGestureSize()
                     && maxValue > config.getThreshold()) {
-//                    && maxValue < 0.4) {
+//                    && maxValue < 0.5) {
                 maxValue = 0;
                 maxIndex = 0;
                 return true;
