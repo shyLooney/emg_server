@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Real-time Chart Example</title>
-<!--    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
+    <!--    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
     <script src="chart.js"></script>
 
     <style>
@@ -59,17 +59,62 @@
             position: relative;
             display: flex;
         }
+
         .progress-fill {
             height: 100%;
             background-color: blue;
             transition: width 0.3s;
         }
+
         .progress-text {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #modelUploadForm {
+            display: none;
+        }
+
+        #filterUploadForm {
+            display: none;
         }
     </style>
 </head>
@@ -101,7 +146,7 @@
             <div class="row">
                 <input type="text" id="gestureNum" class="bottom">
             </div>
-            <div class="row">
+            <div class="row" style="margin: 5px 0 0px 0; width: max-content">
                 <input type="checkbox" id="autosave" class="bottom">Autosave</input>
             </div>
             <div class="row">
@@ -131,6 +176,45 @@
     </div>
     <button id="restart">Restart recipient</button>
     <button id="stopResume">STOP</button>
+    <button id="openModalBtn">Открыть форму</button>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+
+            <form method="POST" th:action="@{/registration}" id="registerForm" style="margin: 10px">
+                <label for="name">Name: </label>
+                <input type="text" name="name" id="name" style="margin: 5px"/><br/>
+                <label for="ip">Ip: </label>
+                <input type="text" name="ip" id="ip" style="margin: 5px"/><br/>
+                <label for="port">Port: </label>
+                <input type="number" id="port" name="port" style="margin: 5px"/><br/>
+
+                <label for="dropdown1">Model </label>
+                <select name="model" id="dropdown1" class="form-control"></select><br/>
+
+                <label for="dropdown2">Filter </label>
+                <select name="filter" id="dropdown2" class="form-control"></select><br/>
+
+                <input type="submit" value="Register" style="margin: 5px"/>
+            </form>
+
+            <div>
+                <button id="uploadModelButton" style="margin: 5px">Upload Model</button>
+
+                <button id="uploadFilterButton" style="margin: 5px">Upload Filter</button>
+            </div>
+
+            <form id="modelUploadForm" enctype="multipart/form-data">
+                <input type="file" name="file" id="modelInput" multiple/>
+            </form>
+
+            <form id="filterUploadForm" enctype="multipart/form-data">
+                <input type="file" name="file" id="filterInput" multiple/>
+            </form>
+        </div>
+    </div>
+
 </div>
 </body>
 </html>
@@ -155,18 +239,6 @@
         tension: 0.1,
         pointRadius: 0
     });
-
-    // for (var i = 0; i < 20; i++) {
-    //     myDatasets.push({
-    //         label: 'Memory',
-    //         fill: false,
-    //         borderColor: 'rgb(75, 192, 192)',
-    //         backgroundColor: 'rgba(75,192,192,0.4)',
-    //         borderColor: 'rgba(75,192,192,0.4)',
-    //         tension: 0.1,
-    //         pointRadius: 0
-    //     });
-    // }
 
     let chart = new Chart(ctx, {
         type: 'line',
@@ -355,6 +427,7 @@
         setTimeout(fetchData, enteredNumber);
         // setTimeout(fetchData, 40000);
     }
+
     const eventSource = new EventSource("/api/chart/spectrum?name=" + name);
 
     document.getElementById('restart').addEventListener('click', function (event) {
@@ -369,4 +442,143 @@
     });
 
     fetchData();
+
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var modal = document.getElementById("modal");
+        var openModalBtn = document.getElementById("openModalBtn");
+        var closeBtn = document.getElementsByClassName("close-btn")[0];
+        var form = document.getElementById("registerForm");
+
+        openModalBtn.onclick = function () {
+            modal.style.display = "block";
+        }
+
+        closeBtn.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        form.onsubmit = function (event) {
+            event.preventDefault();
+
+            var formData = new FormData(form);
+
+            fetch('https://example.com/submit', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    modal.style.display = "none";
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+    });
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/api/upload/model')
+            .then(response => response.json())
+            .then(data => {
+                const dropdown1 = document.getElementById('dropdown1');
+                data.forEach(option => {
+                    let optionElement1 = document.createElement('option');
+                    // optionElement1.value = option;
+                    optionElement1.textContent = option;
+                    dropdown1.appendChild(optionElement1);
+
+                });
+            })
+            .catch(error => console.error('Error fetching options:', error));
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/api/upload/filter')
+            .then(response => response.json())
+            .then(data => {
+                const dropdown2 = document.getElementById('dropdown2');
+                data.forEach(option => {
+                    let optionElement2 = document.createElement('option');
+                    // optionElement2.value = option;
+                    optionElement2.textContent = option;
+                    dropdown2.appendChild(optionElement2);
+                });
+            })
+            .catch(error => console.error('Error fetching options:', error));
+    });
+
+    document.getElementById('uploadModelButton').addEventListener('click', function () {
+        document.getElementById('modelInput').click();
+    });
+
+    document.getElementById('modelInput').addEventListener('change', function () {
+        let form = document.getElementById('modelUploadForm');
+        let formData = new FormData(form);
+
+        fetch('/api/upload/model', {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                alert('Model uploaded successfully!');
+            } else {
+                alert('Model upload failed.');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while uploading files.');
+        });
+    });
+
+    document.getElementById('uploadFilterButton').addEventListener('click', function () {
+        document.getElementById('filterInput').click();
+    });
+
+    document.getElementById('filterInput').addEventListener('change', function () {
+        let form = document.getElementById('filterUploadForm');
+        let formData = new FormData(form);
+
+        fetch('/api/upload/filter', {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                alert('Filter uploaded successfully!');
+            } else {
+                alert('Filter upload failed.');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while uploading files.');
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/api/config/chip?name=' + name)
+            .then(response => response.json())
+            .then(data => {
+                const dropdown1 = document.getElementById('dropdown1');
+                const dropdown2 = document.getElementById('dropdown2');
+                const name = document.getElementById('name');
+                const ip = document.getElementById('ip');
+                const port = document.getElementById('port');
+
+                name.value = 4;
+
+                dropdown1.value = 'aboba';
+                // optionElement1.textContent = option;
+
+            })
+            .catch(error => console.error('Error fetching options:', error));
+    });
 </script>

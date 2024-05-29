@@ -3,18 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+
+        #modelUploadForm {
+            display: none;
+        }
+
+        #filterUploadForm {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-<a href="/home" >Home</a>
-<form method="POST" th:action="@{/registration}" id="registerForm">
-  <label for="name">Name: </label>
-  <input type="text" name="name"/><br/>
-  <label for="ip">Ip: </label>
-  <input type="text" name="ip"/><br/>
-  <label for="confirm">Port: </label>
-  <input type="number" name="port"/><br/>
-  <input type="submit" value="Register"/>
-</form>
+<a href="/home">Home</a>
+<div style="margin: 5px">
 
+    <form method="POST" th:action="@{/registration}" id="registerForm" style="margin: 10px">
+        <label for="name">Name: </label>
+        <input type="text" name="name" style="margin: 5px"/><br/>
+        <label for="ip">Ip: </label>
+        <input type="text" name="ip" style="margin: 5px"/><br/>
+        <label for="confirm">Port: </label>
+        <input type="number" name="port" style="margin: 5px"/><br/>
+
+        <label for="dropdown1">Model </label>
+        <select name="model" id="dropdown1" class="form-control"></select><br/>
+
+        <label for="dropdown2">Filter </label>
+        <select name="filter" id="dropdown2" class="form-control"></select><br/>
+
+        <input type="submit" value="Register" style="margin: 5px"/>
+    </form>
+
+    <div>
+        <button id="uploadModelButton" style="margin: 5px">Upload Model</button>
+
+        <button id="uploadFilterButton" style="margin: 5px">Upload Filter</button>
+    </div>
+
+    <form id="modelUploadForm" enctype="multipart/form-data">
+        <input type="file" name="file" id="modelInput" multiple/>
+    </form>
+
+    <form id="filterUploadForm" enctype="multipart/form-data">
+        <input type="file" name="file" id="filterInput" multiple/>
+    </form>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/api/upload/model')
+            .then(response => response.json())
+            .then(data => {
+                const dropdown1 = document.getElementById('dropdown1');
+                data.forEach(option => {
+                    let optionElement1 = document.createElement('option');
+                    optionElement1.value = option;
+                    optionElement1.textContent = option;
+                    dropdown1.appendChild(optionElement1);
+
+                });
+            })
+            .catch(error => console.error('Error fetching options:', error));
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/api/upload/filter')
+            .then(response => response.json())
+            .then(data => {
+                const dropdown2 = document.getElementById('dropdown2');
+                data.forEach(option => {
+                    let optionElement2 = document.createElement('option');
+                    optionElement2.value = option;
+                    optionElement2.textContent = option;
+                    dropdown2.appendChild(optionElement2);
+                });
+            })
+            .catch(error => console.error('Error fetching options:', error));
+    });
+
+    document.getElementById('uploadModelButton').addEventListener('click', function () {
+        document.getElementById('modelInput').click();
+    });
+
+    document.getElementById('modelInput').addEventListener('change', function () {
+        let form = document.getElementById('modelUploadForm');
+        let formData = new FormData(form);
+
+        fetch('/api/upload/model', {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                alert('Model uploaded successfully!');
+            } else {
+                alert('Model upload failed.');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while uploading files.');
+        });
+    });
+
+    document.getElementById('uploadFilterButton').addEventListener('click', function () {
+        document.getElementById('filterInput').click();
+    });
+
+    document.getElementById('filterInput').addEventListener('change', function () {
+        let form = document.getElementById('filterUploadForm');
+        let formData = new FormData(form);
+
+        fetch('/api/upload/filter', {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                alert('Filter uploaded successfully!');
+            } else {
+                alert('Filter upload failed.');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while uploading files.');
+        });
+    });
+</script>
 </body>
 </html>

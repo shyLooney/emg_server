@@ -3,22 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        #fileUploadForm {
+            display: none;
+        }
+    </style>
 </head>
 <body>
 <div>
-    <form method="POST" enctype="multipart/form-data" action="/api/upload/model">
-        <table>
-            <tr>
-                <td>File to upload:</td>
-                <td><input type="file" name="file"  multiple/></td>
-<!--                accept=".json"-->
-            </tr>
-            <tr>
-                <td></td>
-                <td><input type="submit" value="Upload"/></td>
-            </tr>
-        </table>
+    <button id="uploadButton">Upload Files</button>
+
+    <form id="fileUploadForm" enctype="multipart/form-data">
+        <input type="file" name="file" id="fileInput" multiple />
     </form>
+
+    <script>
+        document.getElementById('uploadButton').addEventListener('click', function() {
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('fileInput').addEventListener('change', function() {
+            let form = document.getElementById('fileUploadForm');
+            let formData = new FormData(form);
+
+            fetch('/api/upload/model', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    alert('Files uploaded successfully!');
+                } else {
+                    alert('File upload failed.');
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while uploading files.');
+            });
+        });
+    </script>
 </div>
+<script>
+
+</script>
 </body>
 </html>

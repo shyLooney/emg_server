@@ -76,57 +76,6 @@ public class SpectrumRestController {
 //        return Flux.just(map);
 //    }
 
-    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<Map<String, List<Double>>> getSpectrum(@RequestParam(value = "name") String name) {
-        if (!chipMap.containsKey(name)) {
-            return null;
-        }
-
-        Chip chip = chipMap.get(name);
-
-        return chip.getSignalRecipient().getDataFlux()
-                .flatMap(list -> {
-                    Map<String, List<Double>> map = new HashMap<>();
-
-
-                    double[] signal = new double[list.size() + 48];
-                    for (int i = 0; i < signal.length; i++) {
-                        if (i >= chip.getPrediction().getInputSignal().size())
-                            signal[i] = 0;
-                        else
-                            signal[i] = chip.getPrediction().getInputSignal().get(i);
-                    }
-
-
-                    FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
-                    Complex[] complex = fft.transform(signal, TransformType.FORWARD);
-
-
-                    double[] x = fftshift(fftfreq(complex.length, 1.0));
-
-                    for (int i = 0; i < x.length; i++) {
-                        x[i] *= 1000;
-                    }
-
-                    double[] outputSignal = new double[complex.length];
-                    for (int i = 0; i < outputSignal.length; i++) {
-                        outputSignal[i] = complex[i].abs();
-                    }
-
-                    double[] y = fftshift(outputSignal);
-
-                    for (int i = 0; i < y.length; i++) {
-                        y[i] = 10 * Math.log10(y[i]);
-                    }
-
-                    map.put("labels", DoubleStream.of(x).boxed().toList());
-                    map.put("values", DoubleStream.of(y).boxed().toList());
-
-//                    Flux<Map<String, List<Double>>> mapFlux = Flux.just(map);
-                    return Flux.just(map);
-                });
-    }
-
     private double[] fftshift(double[] data) {
         double[] temp = new double[data.length];
         int shiftPointNum = data.length / 2;

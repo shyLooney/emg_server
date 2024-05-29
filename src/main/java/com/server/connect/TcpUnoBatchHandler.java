@@ -19,7 +19,7 @@ public class TcpUnoBatchHandler implements BatchHandler{
     @Override
     public List<Integer> getValue() throws IOException {
         int offset = 0;
-        byte[] data = new byte[528];
+        byte[] data = new byte[config.getPacketSize()];
         int value;
         List<Integer> signalQueue = new ArrayList<>();
 

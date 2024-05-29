@@ -1,34 +1,43 @@
 package com.server.model;
 
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.DatabindException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.tensorflow.*;
 import org.tensorflow.exceptions.TensorFlowException;
 import org.tensorflow.ndarray.Shape;
-import org.tensorflow.op.train.ApplyGradientDescent;
 import org.tensorflow.types.TFloat32;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 //@Component
 @Slf4j
-public class DefaultNeuronModel implements NeuronModel {
+public class DefaultNeuralNetwork extends NeuralNetwork {
     private SavedModelBundle model;
     private Session session;
     private final int OUTPUT_SIZE = 4;
     private final int INPUT_SIZE = 2000;
-
-    public DefaultNeuronModel() {
-        loadModel();
-    }
+    private NeuralNetworkConfig neuralNetworkConfig;
 
 
-    public void loadModel() {
+    public DefaultNeuralNetwork(Path dir) {
+        super(dir);
+
         try {
-            model = SavedModelBundle.load("model", "serve");
+            ObjectMapper mapper = new ObjectMapper();
+            neuralNetworkConfig = mapper.readValue(dir.resolve("config.json").toFile(), NeuralNetworkConfig.class);
+            System.out.println(dir);
+            model = SavedModelBundle.load(dir.toString(), neuralNetworkConfig.getTags());
         }
         catch (TensorFlowException exception) {
             log.warn(exception.getMessage());
             throw new RuntimeException();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
         try {
             session = model.session();
@@ -38,6 +47,10 @@ public class DefaultNeuronModel implements NeuronModel {
             model.close();
             throw new RuntimeException();
         }
+    }
+
+
+    public void loadModel() {
 
     }
 
@@ -48,8 +61,8 @@ public class DefaultNeuronModel implements NeuronModel {
                      Shape.of(1).append(INPUT_SIZE),
                      vector.asRawTensor().data());
              Result result = session.runner()
-                     .feed("serving_default_reshape_input:0", inputs)
-                     .fetch("StatefulPartitionedCall")
+                     .feed(neuralNetworkConfig.getFeed(), inputs)
+                     .fetch(neuralNetworkConfig.getFetch())
                      .run();
              Tensor val = result.get(0);
              RawTensor rawTensor = val.asRawTensor();) {

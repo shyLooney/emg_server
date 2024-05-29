@@ -1,5 +1,17 @@
 spring:
   config:
     location: classpath:/,file:./application.yml
-storage:
-  location: a
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+    enabled-by-default: true
+#  metrics:
+#    distribution:
+#      percentiles-histogram:
+#        "[http.server.requests]": true
+#  prometheus:
+#    metrics:
+#      export:
+#        enabled: true

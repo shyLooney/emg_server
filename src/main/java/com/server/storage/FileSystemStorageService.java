@@ -1,12 +1,15 @@
 package com.server.storage;
 
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -14,14 +17,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-//@Service
+@Service
 public class FileSystemStorageService implements StorageService {
 
 	private final Path rootLocation;
 
-//	@Autowired
+	@Autowired
 	public FileSystemStorageService(StorageProperties properties) {
         
         if(properties.getLocation().trim().length() == 0){
@@ -56,6 +63,37 @@ public class FileSystemStorageService implements StorageService {
 	}
 
 	@Override
+	public void store(MultipartFile file, String dir) {
+		try {
+			Files.createDirectories(rootLocation.resolve(dir));
+		}
+		catch (IOException e) {
+			throw new StorageException("Could not initialize storage", e);
+		}
+
+		try {
+			if (file.isEmpty()) {
+				throw new StorageException("Failed to store empty file.");
+			}
+			Path destinationFile = this.rootLocation.resolve(dir).resolve(
+							Paths.get(file.getOriginalFilename()))
+					.normalize().toAbsolutePath();
+			if (!destinationFile.getParent().equals(this.rootLocation.resolve(dir).toAbsolutePath())) {
+				// This is a security check
+				throw new StorageException(
+						"Cannot store file outside current directory.");
+			}
+			try (InputStream inputStream = file.getInputStream()) {
+				Files.copy(inputStream, destinationFile,
+						StandardCopyOption.REPLACE_EXISTING);
+			}
+		}
+		catch (IOException e) {
+			throw new StorageException("Failed to store file.", e);
+		}
+	}
+
+	@Override
 	public Stream<Path> loadAll() {
 		try {
 			return Files.walk(this.rootLocation, 1)
@@ -66,6 +104,27 @@ public class FileSystemStorageService implements StorageService {
 			throw new StorageException("Failed to read stored files", e);
 		}
 
+	}
+
+	public List<InputStream> loadAll(String dir) {
+		List<InputStream> list = new ArrayList<>();
+		try {
+			Files.walk(this.rootLocation.resolve(dir), 1)
+					.map(fd -> {
+						try {
+							return new FileInputStream(fd.toFile());
+						}
+						catch (IOException e) {
+							return null;
+						}
+					})
+					.filter(Objects::nonNull)
+					.forEach(list::add);
+		}
+		catch (IOException e) {
+			throw new StorageException("Failed to read stored files", e);
+		}
+		return list;
 	}
 
 	@Override

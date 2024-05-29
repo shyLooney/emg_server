@@ -1,5 +1,8 @@
 package com.server.chip;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.server.filter.Filter;
+import com.server.model.NeuralNetwork;
 import lombok.Data;
 
 import java.io.IOException;
@@ -15,10 +18,13 @@ public class Chip implements Serializable {
     private String name;
     private String ip;
     private int port;
+    @JsonIgnore
     private Socket socket;
     private SignalRecipient signalRecipient;
     private RecipientConfig config;
     private Thread threadRecipient;
+//    private Filter filter;
+//    private NeuralNetwork neuralNetwork;
 
     public Chip(String name, String ip, int port) {
         this.ip = ip;
@@ -27,7 +33,7 @@ public class Chip implements Serializable {
     }
 
     public Chip() {
-        signalRecipient = new SignalRecipient();
+//        signalRecipient = new SignalRecipient();
     }
 
     public void restart() {

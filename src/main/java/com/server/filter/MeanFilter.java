@@ -1,7 +1,17 @@
 package com.server.filter;
 
-public class MeanFilter implements Filter {
+import lombok.Data;
+
+import java.nio.file.Path;
+
+@Data
+public class MeanFilter extends Filter {
     private float mean = 0;
+
+    public MeanFilter(Path dir) {
+        super(dir);
+        this.mean = mean;
+    }
 
     @Override
     public double[] calculate(double... sample) {

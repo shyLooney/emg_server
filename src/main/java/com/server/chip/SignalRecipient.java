@@ -1,5 +1,6 @@
 package com.server.chip;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.psambit9791.jdsp.filter.adaptive.AP;
 import com.server.SignalUtils;
 import com.server.connect.BatchHandler;
@@ -9,7 +10,7 @@ import com.server.detector.SimpleMiddlePeakDetector;
 import com.server.filter.DefaultFilter;
 import com.server.filter.Filter;
 import com.server.filter.MeanFilter;
-import com.server.model.NeuronModel;
+import com.server.model.NeuralNetwork;
 import lombok.Data;
 import org.apache.commons.math3.filter.*;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -23,6 +24,7 @@ import reactor.core.publisher.FluxSink;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,14 +33,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 @Data
 public class SignalRecipient implements Runnable {
-    private NeuronModel neuronModel;
+    private NeuralNetwork neuralNetwork;
     private Prediction prediction;
     private RecipientConfig config;
-    private DefaultFilter defaultFilter;
+    private Filter defaultFilter;
     private List<Filter> filters;
     private ChartInfo chartInfo;
+    @JsonIgnore
     private Socket socket;
     private String nameEndPoint;
+    @JsonIgnore
     private SimpMessagingTemplate simpMessagingTemplate;
     private CopyOnWriteArrayList<Float> signalQueue;
     private CopyOnWriteArrayList<Integer> pureSignal;
@@ -49,17 +53,14 @@ public class SignalRecipient implements Runnable {
     private float kalmanMean = 0;
     private float defaultMean = 0;
     private float withoutFilterMean = 0;
-    private final Flux<List<Float>> dataFlux;
-    private FluxSink<List<Float>> dataSink;
+    @JsonIgnore
     private DataInputStream inputStream;
 
     public SignalRecipient() {
-        this.dataFlux = Flux.create(emitter -> this.dataSink = emitter, FluxSink.OverflowStrategy.BUFFER);
-
-        dataFlux.subscribe(System.out::println);
 
         prediction = new Prediction();
-        defaultFilter = new DefaultFilter();
+//        defaultFilter = new DefaultFilter();
+//        defaultFilter = new MeanFilter(null);
         chartInfo = new ChartInfo();
 
         pureSignal = new CopyOnWriteArrayList<>();
@@ -104,7 +105,7 @@ public class SignalRecipient implements Runnable {
             BatchHandler batchHandler = new TcpUnoBatchHandler(config, inputStream);
             GestureDetector gestureDetector = new SimpleMiddlePeakDetector(config);
             this.inputStream = inputStream;
-            Filter meanFilter = new MeanFilter();
+            MeanFilter meanFilter = new MeanFilter(Path.of("/mean.txt"));
 
 
             System.out.println(config);
@@ -136,8 +137,8 @@ public class SignalRecipient implements Runnable {
 
 
 
-//                    withoutFilterSignal.add(a);
-//                    defaultFilterSignal.add(b);
+                    withoutFilterSignal.add(a);
+                    defaultFilterSignal.add(b);
 
                     if (samples.size() > config.getGestureSize()) {
                         samples.pollFirst();
@@ -155,11 +156,10 @@ public class SignalRecipient implements Runnable {
                         }
 
                         prediction = new Prediction(System.currentTimeMillis(),
-                                neuronModel.predict(tempArray),
+                                neuralNetwork.predict(tempArray),
                                 samples,
                                 pureSamples
                         );
-                        dataSink.next(prediction.getInputSignal());
 
                         simpMessagingTemplate.convertAndSend("/topic/portfolio?name=" + nameEndPoint, SignalUtils.getSpectrum(prediction.getInputSignal()));
                         simpMessagingTemplate.convertAndSend("/topic/portfolio/gesture?name=" + nameEndPoint, prediction);
@@ -220,8 +220,8 @@ public class SignalRecipient implements Runnable {
         return this;
     }
 
-    public SignalRecipient setNeuronModel(NeuronModel neuronModel) {
-        this.neuronModel = neuronModel;
+    public SignalRecipient setNeuralNetwork(NeuralNetwork neuralNetwork) {
+        this.neuralNetwork = neuralNetwork;
         return this;
     }
 
@@ -242,13 +242,13 @@ public class SignalRecipient implements Runnable {
 
 
     public float defaultFilter(double value) {
-        float temp = defaultFilter.calculate(value);
-        defaultMean = (float) (defaultMean * 0.99 + 0.01 * temp);
-        float sig = temp - defaultMean;
+//        float temp = defaultFilter.calculate(value);
+//        defaultMean = (float) (defaultMean * 0.99 + 0.01 * temp);
+//        float sig = temp - defaultMean;
 
-        defaultFilterSignal.add(sig);
-
-        return sig;
+//        defaultFilterSignal.add(sig);
+return 0f;
+//        return sig;
     }
 
     public float withoutFilter(double value) {

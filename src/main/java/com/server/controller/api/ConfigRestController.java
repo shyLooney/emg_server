@@ -13,7 +13,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/config")
 public class ConfigRestController {
-    Map<String, Chip> chipMap;
+    private final Map<String, Chip> chipMap;
 
     public ConfigRestController(Map<String, Chip> chipMap) {
         this.chipMap = chipMap;
@@ -26,5 +26,11 @@ public class ConfigRestController {
         }
         else
             return null;
+    }
+
+    @GetMapping
+    @RequestMapping("/chip")
+    public Chip getChip(@RequestParam(name = "name") String name) {
+        return chipMap.getOrDefault(name, null);
     }
 }

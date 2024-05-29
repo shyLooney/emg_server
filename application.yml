@@ -2,19 +2,14 @@ server:
   host: localhost
   port: 8080
   address: 0.0.0.0
-
+storage:
+  location: upload
 spring:
   servlet:
     multipart:
       max-file-size: 3MB
       max-request-size: 3MB
       enabled: true
-#  rsocket:
-#    server:
-#      port: 0
-#      mapping-path: "/rsocket"
-#      transport: "websocket"
-
 recipient:
   graphLen: 12000
   sigScale: 0.00001

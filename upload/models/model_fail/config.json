@@ -1,0 +1,7 @@
+{
+  "tags": [
+    "serve"
+  ],
+  "feed": "serving_default_reshape_input:0",
+  "fetch": "StatefulPartitionedCall"
+}
