@@ -89,7 +89,6 @@ public class SignalRecipient implements Runnable {
         MeasurementModel mm = new DefaultMeasurementModel(H, R);
 
         kalmanFilter = new KalmanFilter(pm, mm);
-
     }
 
     public void addFilter(Filter filter) {
@@ -108,7 +107,6 @@ public class SignalRecipient implements Runnable {
             MeanFilter meanFilter = new MeanFilter(Path.of("/mean.txt"));
 
 
-            System.out.println(config);
             socket.setSoTimeout(5000);
 //                socket.connect(new InetSocketAddress(ip, port), 10000);
 

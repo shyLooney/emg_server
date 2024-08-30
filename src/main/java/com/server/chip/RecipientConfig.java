@@ -12,7 +12,8 @@ public class RecipientConfig {
     private double sigScale;
     private int gestureSize;
     private int packetSize;
-    private float threshold;
+    private float minThreshold;
+    private float maxThreshold;
     private int waitingConnectionTimeout;
     private int waitingReadTimeout;
     private int FILTER_SIZE = 127;
@@ -22,7 +23,8 @@ public class RecipientConfig {
         sigScale = config.getSigScale();
         gestureSize = config.getGestureSize();
         packetSize = config.getPacketSize();
-        threshold = config.getThreshold();
+        minThreshold = config.getMinThreshold();
+        maxThreshold = config.getMaxThreshold();
         waitingConnectionTimeout = config.getWaitingConnectionTimeout();
         waitingReadTimeout = config.getWaitingReadTimeout();
     }

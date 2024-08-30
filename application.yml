@@ -1,6 +1,6 @@
 server:
   host: localhost
-  port: 8080
+  port: 2236
   address: 0.0.0.0
 storage:
   location: upload
@@ -15,7 +15,8 @@ recipient:
   sigScale: 0.00001
   gestureSize: 2000
   packetSize: 528
-  threshold: 0.05
+  maxThreshold: 0.5
+  minThreshold: 0.05
   waitingConnectionTimeout: 10000
   waitingReadTimeout: 5000
 
