@@ -20,4 +20,4 @@ java -jar server.jar
 > OpenJDK 64-Bit Server VM (build 21.0.1+12-29, mixed mode, sharing)
 > ```
 ## Документация
-Более подробная документация находится в папке [doc](https://https://github.com/shyLooney/emg_server/tree/master/doc)
+Более подробная документация находится в папке [doc](https://github.com/shyLooney/emg_server/tree/master/doc)
