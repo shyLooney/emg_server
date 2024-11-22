@@ -19,7 +19,7 @@ public class ChartRestController {
 
     @GetMapping
     public Map<String, List<? extends Number>> getChartData(@RequestParam("name") String name,
-                                                  @RequestParam(value = "type", defaultValue = "default") String type) {
+                                                            @RequestParam(value = "type", defaultValue = "default") String type) {
         Map<String, List<? extends Number>> chartData = new HashMap<>();
 
         if (!chipMap.containsKey(name)) {

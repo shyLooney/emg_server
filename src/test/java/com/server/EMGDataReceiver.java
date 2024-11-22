@@ -22,7 +22,7 @@ public class EMGDataReceiver {
 
     public static final int TCP_PACKET_SIZE = ((TRANSPORT_BLOCK_HEADER_SIZE / 4) + (AD1299_NUM_CH + 1) * (SAMPLES_PER_TRANSPORT_BLOCK)) * 4;
 
-    public static void main(String[] args) {
+    public static void test() {
         Socket sock = null;
         try {
             sock = new Socket(EMG8x_ADDRESS, TCP_SERVER_PORT);

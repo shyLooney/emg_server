@@ -18,4 +18,3 @@ recipient:
   threshold: 0.05
   waitingConnectionTimeout: 10000
   waitingReadTimeout: 5000
-

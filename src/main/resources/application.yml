@@ -1,6 +1,6 @@
 spring:
   config:
-    location: classpath:/,file:./application.yml
+    location: classpath:/,file:./application.yaml
 management:
   endpoints:
     web:
