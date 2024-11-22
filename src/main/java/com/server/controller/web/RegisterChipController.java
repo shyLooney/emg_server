@@ -55,6 +55,7 @@ public class RegisterChipController {
         }
         else {
 
+            System.out.println(configLoader);
             NeuralNetwork neuralNetwork = null;
             RecipientConfig recipientConfig = new RecipientConfig(configLoader);
 
@@ -74,11 +75,6 @@ public class RegisterChipController {
             chipMap.put(chip.getName(), chip);
             chip.start();
 
-
-            chip.start();
-            chipMap.put(chip.getName(), chip);
-            for (var item : chipMap.values())
-                System.out.println(item);
         }
 
         sessionStatus.setComplete();

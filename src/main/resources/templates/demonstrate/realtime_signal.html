@@ -3,14 +3,10 @@
 
 <head>
     <title>Real-time Chart Example</title>
-    <!--    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
     <script src="../chart.js"></script>
     <script src="../stomp.js"></script>
     <script src="../sockjs.min.js"></script>
     <link rel="stylesheet" href="../demonstrate/styles/main.css">
-    <!--    <link rel="stylesheet" href="../demonstrate/styles/progress.css">-->
-    <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
-    <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-circle-progress/1.2.2/circle-progress.min.js"></script>-->
 
 
     <style>
@@ -89,14 +85,6 @@
 </div>
 <button id="restart">Restart recipient</button>
 <button onclick="openFullscreen()">Полный экран</button>
-
-<!-- <script>
-    document.getElementById('reset-filter').addEventListener('click', function () {
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', currentPageUrl + '/options?action=reset_filter', true);
-        xhr.send();
-    });
-</script> -->
 
 
 <script>
@@ -188,10 +176,6 @@
     const name = currentPageUrl.searchParams.get("name");
     let number;
 
-    // const number = 10000;
-    // numberArray = Array.from({length: number}, (_, index) => index + 1);
-    // chart.data.labels = numberArray;
-
     fetch('/api/config?name=' + name)
         .then(response => response.json())
         .then(data => {
@@ -221,49 +205,9 @@
                 chart.data.datasets[0].data.splice(0, chart.data.datasets[0].data.length - number);
             }
 
-            // chart.data.datasets[a].data = 1;
-            // chart.data.datasets[a].labels = a;
             chart.update();
         });
     });
-
-    // function fetchData() {
-    //     fetch("/api/chart?name=" + name + "&type=default")
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             // data.values.forEach(value => {
-    //             //     chart.data.datasets[0].data.push(value);
-    //             // });
-    //             //
-    //             // if (chart.data.datasets[0].data.length > 10000) {
-    //             //     chart.data.datasets[0].data.splice(0, chart.data.datasets[0].data.length - 10000);
-    //             // }
-    //             chart.data.datasets[0].data = data.default;
-    //             chart.data.datasets[1].data = data.valuesNoFilter;
-    //
-    //             chart.update();
-    //
-    //         });
-    //     // .catch(error => console.error('Ошибка:', error));
-    //
-    //     setTimeout(fetchData, enteredNumber);
-    //     // setTimeout(fetchData, 40000);
-    // }
-
-    function fetchPrediction() {
-        fetch("/api/predict/" + name)
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('prediction').textContent = data;
-            })
-            .catch(error => {
-                console.error("Произошла ошибка при чтении значения с сервера:", error);
-            });
-
-        setTimeout(fetchPrediction, 200);
-        // setTimeout(fetchPrediction, 20000);
-    }
-
     document.getElementById('restart').addEventListener('click', function (event) {
         event.preventDefault();
 
@@ -288,8 +232,6 @@
         }
     }
 
-    // fetchData();
-    // fetchPrediction();
 </script>
 </body>
 

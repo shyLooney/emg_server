@@ -66,6 +66,7 @@ public class Chip implements Serializable {
     }
 
     public void start() {
+        System.out.println(config);
         try {
             socket = new Socket(ip, port);
             socket.setSoTimeout(5000);
@@ -73,6 +74,7 @@ public class Chip implements Serializable {
 
             threadRecipient = new Thread(signalRecipient);
             threadRecipient.start();
+
         } catch (IOException e) {
             e.printStackTrace();
         }

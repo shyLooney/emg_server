@@ -3,15 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        table{
+            border: 5px solid #000000;
+            border-radius: 10px;
+            padding: 10px;
+            border-collapse: separate;
+            border-spacing: 10px 0;
+        }
+        td {
+            border: 5px solid #CCCCCC;
+            border-radius: 10px;
+            /*padding: 10px;*/
+            padding: 10px 0;
+            /*border-left: 5px solid #CCCCCC;*/
+            /*border-right: 5px solid #CCCCCC; */
+            border-radius: 10px;
+        }
+        tr {
+            border: 5px solid #CCCCCC;
+            border-radius: 10px;
+            padding: 10px;
+            /*border-left: 5px solid #CCCCCC;*/
+            /*border-right: 5px solid #CCCCCC; */
+            align-content: center;
+        }
+    </style>
+
 </head>
 <body>
 
 <a href="/home">Home</a>
-<a href="/registration">Registration</a>
-<ul>
-    <li th:each="chip : ${chipMap.values()}">
-        <a th:href="@{/chart?name={value}(value=${chip.name})}" th:text="${chip.name}">lol</a>
-    </li>
-</ul>
+<a href="/registration">Добавить устройство</a>
+<table>
+    <tr style="">
+        <th>Название устройства</th>
+        <th colspan="2">Демонстрационные графики</th>
+        <th>График жестов</th>
+        <th>График спектров</th>
+    </tr>
+    <tr th:each="chip : ${chipMap.values()}">
+        <td>
+            <p th:text=" ${chip.name}"></p>
+        </td>
+        <td>
+            <a th:href="@{/pres/chart?name={value}(value=${chip.name})}">сигнал</a>
+        </td>
+        <td>
+            <a th:href="@{/pres/gesture?name={value}(value=${chip.name})}">жесты</a>
+        </td>
+        <td>
+            <a th:href="@{/gesture?name={value}(value=${chip.name})}">ссылка</a>
+        </td>
+        <td>
+            <a th:href="@{/spectrum?name={value}(value=${chip.name})}">ссылка</a>
+        </td>
+    </tr>
+</table>
 </body>
 </html>

@@ -19,26 +19,26 @@
 <div style="margin: 5px">
 
     <form method="POST" th:action="@{/registration}" id="registerForm" style="margin: 10px">
-        <label for="name">Name: </label>
+        <label for="name">Название: </label>
         <input type="text" name="name" style="margin: 5px"/><br/>
         <label for="ip">Ip: </label>
         <input type="text" name="ip" style="margin: 5px"/><br/>
-        <label for="confirm">Port: </label>
+        <label for="confirm">Порт: </label>
         <input type="number" name="port" style="margin: 5px"/><br/>
 
-        <label for="dropdown1">Model </label>
+        <label for="dropdown1">Модель </label>
         <select name="model" id="dropdown1" class="form-control"></select><br/>
 
-        <label for="dropdown2">Filter </label>
+        <label for="dropdown2">Фильтр </label>
         <select name="filter" id="dropdown2" class="form-control"></select><br/>
 
-        <input type="submit" value="Register" style="margin: 5px"/>
+        <input type="submit" value="Подключиться" style="margin: 5px"/>
     </form>
 
     <div>
-        <button id="uploadModelButton" style="margin: 5px">Upload Model</button>
+        <button id="uploadModelButton" style="margin: 5px">Загрузить модель</button>
 
-        <button id="uploadFilterButton" style="margin: 5px">Upload Filter</button>
+        <button id="uploadFilterButton" style="margin: 5px">Загрузить фильтр</button>
     </div>
 
     <form id="modelUploadForm" enctype="multipart/form-data">
